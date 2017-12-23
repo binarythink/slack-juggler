@@ -13,4 +13,4 @@ slack:
 
 logging:
   level:
-    in.yanolja.sf.slack: DEBUG
+    io.kindler.slack: DEBUG
