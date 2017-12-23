@@ -8,8 +8,13 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class JiraIssue {
+    private boolean fetch = false;
     private String id;
     private String self;
     private String key;
     private JiraIssueFields fields;
+
+    public JiraIssue(String key) {
+        this.key = key;
+    }
 }

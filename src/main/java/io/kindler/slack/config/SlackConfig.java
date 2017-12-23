@@ -59,7 +59,7 @@ public class SlackConfig {
     SlackChatConfiguration jiraConnectBot() {
         return SlackChatConfiguration.getConfiguration()
                 .withName("슾비서 : GoJIRA")
-                .withIcon("https://a.slack-edge.com/41b0a/img/plugins/jira/service_512.png");
+                .withIcon("https://lh3.googleusercontent.com/GkgChJMixx9JAmoUi1majtfpjg1Ra86gZR0GCehJfVcOGQI7Ict_TVafXCtJniVn3R0");
     }
 
 }
