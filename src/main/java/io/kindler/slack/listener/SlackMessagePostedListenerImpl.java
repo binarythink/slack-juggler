@@ -31,9 +31,11 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
 
         // 서비스 발동 조건을 확인하고 서비스를 실행한다
         if (jiraInformationService.isTrigger(content)) {
+            log.debug("run jiraInformationService.");
             jiraInformationService.execute(event, slackSession);
         }
         if (plantUmlService.isTrigger(content)) {
+            log.debug("run plantUmlService.");
             plantUmlService.execute(event, slackSession);
         }
     }
