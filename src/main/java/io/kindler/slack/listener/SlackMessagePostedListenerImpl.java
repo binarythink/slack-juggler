@@ -4,8 +4,8 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
-import io.kindler.slack.service.JiraConnectService;
-import io.kindler.slack.service.PlantUmlService;
+import io.kindler.slack.service.jira.JiraInformationService;
+import io.kindler.slack.service.plantuml.PlantUmlService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
     PlantUmlService plantUmlService;
 
     @Autowired
-    JiraConnectService jiraConnectService;
+    JiraInformationService jiraInformationService;
 
     @Override
     public void onEvent(SlackMessagePosted event, SlackSession slackSession) {
@@ -30,8 +30,8 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
         log.info("[{}] {} says \n{}", event.getTimeStamp(), sender.getId(), content);
 
         // 서비스 발동 조건을 확인하고 서비스를 실행한다
-        if (jiraConnectService.isTrigger(content)) {
-            jiraConnectService.execute(event, slackSession);
+        if (jiraInformationService.isTrigger(content)) {
+            jiraInformationService.execute(event, slackSession);
         }
         if (plantUmlService.isTrigger(content)) {
             plantUmlService.execute(event, slackSession);

@@ -1,9 +1,10 @@
-package io.kindler.slack.service;
+package io.kindler.slack.service.jira;
 
 import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.SlackPreparedMessage;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
+import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.jira.JiraIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class JiraConnectService implements JugglerService<SlackMessagePosted> {
+public class JiraInformationService implements JugglerService<SlackMessagePosted> {
     @Value(value = "${slack.bot.jira.pattern}")
     private String pattern;
 
