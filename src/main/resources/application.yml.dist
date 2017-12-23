@@ -9,7 +9,7 @@ slack:
     plantuml:
       pattern: '@startuml'          #plantumlService trigger regex
       filepath:                     #plantuml save path
-      url:                          # plantuml img url
+      url:                          #plantuml img url
 
 logging:
   level:
