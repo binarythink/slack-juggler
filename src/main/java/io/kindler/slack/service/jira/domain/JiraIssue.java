@@ -1,4 +1,4 @@
-package io.kindler.slack.service.jira;
+package io.kindler.slack.service.jira.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -5,7 +5,7 @@ import com.ullink.slack.simpleslackapi.SlackPreparedMessage;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import io.kindler.slack.service.JugglerService;
-import io.kindler.slack.service.jira.JiraIssue;
+import io.kindler.slack.service.jira.domain.JiraIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
