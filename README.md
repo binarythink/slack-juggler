@@ -9,11 +9,15 @@ KBS 드라마 `저글러스`의 의미를 빌려 비서를 비유적으로 표�
   
 ## Features
 
-현재 만들어진 기능은 다음과 같아요  
+현재 만들어진 기능은 다음과 같아요 *— 언제든지 pullRequest는 환영입니다*  
 
-* `JiraInformationService` : 대화내용에 이슈번호를 찾아 이슈의 기본적인 정보를 제공합니다
-* `PlantUmlService` : `plantuml` 기능을 사용해 대화내용에 plantuml 구문을 인식하여 UML을 만들어 줍니다
-* (coming soon)
+### `JiraInformationService`
+대화내용에 이슈번호를 찾아 이슈의 기본적인 정보를 제공합니다
+
+### `PlantUmlService`
+`plantuml` 기능을 사용해 대화내용에 plantuml 구문을 인식하여 UML을 만들어 줍니다
+
+### coming soon
 
 ## How to use it?
 ### Add slack bot in user workspace.
@@ -28,7 +32,7 @@ KBS 드라마 `저글러스`의 의미를 빌려 비서를 비유적으로 표�
 ### Customize
 * `config/SlackConfig` 에서 봇의 모양을 바꿀 수 있어요
 * 나만의 추가 기능을 구현하고자 하는 경우 `JugglerService`를 상속받아 `isTrigger()`와 `execute()` 를 구현하고
-  `io.kindler.listener`의 알맞은 이벤트 리스너에 등록하세요
+  `io.kindler.slack.listener`의 알맞은 이벤트 리스너에 등록하세요
 
 ## Thanks for ... (depend on)
  * SpringBoot [site](https://projects.spring.io/spring-boot/)
