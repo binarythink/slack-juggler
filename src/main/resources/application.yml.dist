@@ -6,6 +6,14 @@ slack:
       pattern: '.*(JRASERVER-\d{1,}).*' #jiraConnectService trigger regex
       scheme: https                 #jira scheme
       host: jira.atlassian.com      #jira host
+
+    github:
+      auth:
+        username: my-github-id      # github id
+        password: s3cr3t            # github password
+      repo:
+        owner: my-github-id         # issue scope (user or organizaion)
+
     plantuml:
       pattern: '@startuml'          #plantumlService trigger regex
       filepath:                     #plantuml save path

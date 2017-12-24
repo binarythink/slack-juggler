@@ -4,6 +4,7 @@ import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
+import io.kindler.slack.service.github.GithubIssueService;
 import io.kindler.slack.service.jira.JiraInformationService;
 import io.kindler.slack.service.plantuml.PlantUmlService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,9 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
     @Autowired
     JiraInformationService jiraInformationService;
 
+    @Autowired
+    GithubIssueService githubIssueService;
+
     @Override
     public void onEvent(SlackMessagePosted event, SlackSession slackSession) {
         SlackUser sender = event.getSender();
@@ -33,6 +37,10 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
         if (jiraInformationService.isTrigger(content)) {
             log.debug("run jiraInformationService.");
             jiraInformationService.execute(event, slackSession);
+        }
+        if (githubIssueService.isTrigger(content)) {
+            log.debug("run githubInformationService");
+            githubIssueService.execute(event, slackSession);
         }
         if (plantUmlService.isTrigger(content)) {
             log.debug("run plantUmlService.");
