@@ -126,7 +126,7 @@ public class JiraInformationService implements JugglerService<SlackMessagePosted
         //필드 추가
         attachment.addField("status", data.getFields().getStatus().getName(), true);
         attachment.addField("assignee", data.getFields().getAssignee() != null ? StringUtils.defaultIfEmpty(data.getFields().getAssignee().getDisplayName(), "-") : "-", true);
-        attachment.addField("labels", data.getFields().getLabels() != null ? String.join(", ", data.getFields().getLabels()) : "-", false);
+        attachment.addField("labels", data.getFields().getLabels() != null ? StringUtils.defaultIfEmpty(String.join(", ", data.getFields().getLabels()), "-") : "-", false);
         attachment.addField("creator", data.getFields().getCreator() != null ? StringUtils.defaultIfEmpty(data.getFields().getCreator().getDisplayName(), "-") : "-", true);
         attachment.addField("created", data.getFields().getCreated().toString(), true);
         attachment.addField("duedate", data.getFields().getDuedate() != null ? StringUtils.defaultIfEmpty(data.getFields().getDuedate().toString(), "-") : "-", true);
