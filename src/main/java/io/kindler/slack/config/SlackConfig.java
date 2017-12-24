@@ -11,12 +11,14 @@ import io.kindler.slack.properties.SlackProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 
 @Slf4j
 @Configuration
+@ComponentScan(basePackages = "io.kindler.slack")
 public class SlackConfig {
 
     @Autowired

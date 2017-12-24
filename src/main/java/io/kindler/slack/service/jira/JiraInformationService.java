@@ -9,6 +9,7 @@ import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.jira.domain.JiraIssue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.tyrus.core.uri.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +70,7 @@ public class JiraInformationService implements JugglerService<SlackMessagePosted
     public boolean isTrigger(String content) {
         Pattern pattern = Pattern.compile(this.pattern, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(content);
-        return matcher.matches();
+        return matcher.find();
     }
 
     private JiraIssue getData(String key) throws RestClientException {
