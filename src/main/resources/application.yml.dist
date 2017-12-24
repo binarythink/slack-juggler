@@ -3,7 +3,7 @@ slack:
     token: s3cr3t                   #slackbot token
   bot:
     jira:
-      pattern: '(JRASERVER-\d{1,})' #jiraConnectService trigger regex
+      pattern: '.*(JRASERVER-\d{1,}).*' #jiraConnectService trigger regex
       scheme: https                 #jira scheme
       host: jira.atlassian.com      #jira host
     plantuml:

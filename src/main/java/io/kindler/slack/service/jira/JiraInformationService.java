@@ -53,7 +53,7 @@ public class JiraInformationService implements JugglerService<SlackMessagePosted
         Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(content);
         SlackPreparedMessage message;
         while (matcher.find()) {
-            issueKey = matcher.group().toUpperCase();
+            issueKey = matcher.group(1).toUpperCase();
             try {
                 data = getData(issueKey);
                 log.debug("{}", data);
