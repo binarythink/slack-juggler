@@ -11,7 +11,7 @@ KBS 드라마 `저글러스`의 의미를 빌려 비서를 비유적으로 표�
 
 현재 만들어진 기능은 다음과 같아요 *— 언제든지 pullRequest는 환영입니다*  
 
-### `SlackIssueService`
+### `GithubIssueService`
 대화내용에 이슈번호를 찾아 이슈의 기본적인 정보와 연결을 제공합니다
 
 ### `JiraInformationService`
