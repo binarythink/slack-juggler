@@ -1,7 +1,6 @@
 package io.kindler.slack.service.jira;
 
 import io.kindler.slack.Application;
-import io.kindler.slack.ApplicationTests;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +12,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
-public class JiraInformationServiceTest {
+public class JiraIssueServiceTest {
     @Autowired
-    JiraInformationService service;
+    JiraIssueService service;
 
     @Test
     public void isTriggerSingle() {

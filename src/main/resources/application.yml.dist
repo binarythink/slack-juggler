@@ -1,11 +1,12 @@
 slack:
   config:
-    token: s3cr3t                   #slackbot token
+    token: s3cr3t                   # slackbot token
   bot:
     jira:
-      pattern: '.*(JRASERVER-\d{1,}).*' #jiraConnectService trigger regex
-      scheme: https                 #jira scheme
-      host: jira.atlassian.com      #jira host
+      pattern: '.*(JRASERVER-\d{1,}).*' # jiraConnectService trigger regex
+      scheme: https                 # jira scheme
+      host: jira.atlassian.com      # jira host
+      version: latest               # jira api version
 
     github:
       auth:
@@ -15,10 +16,12 @@ slack:
         owner: my-github-id         # issue scope (user or organizaion)
 
     plantuml:
-      pattern: '@startuml'          #plantumlService trigger regex
-      filepath:                     #plantuml save path
-      url:                          #plantuml img url
+      filepath:                     # plantuml save path
+      url:                          # plantuml img url
 
+spring:
+  mvc:
+    static-path-pattern: /resources/**
 logging:
   level:
     io.kindler.slack: DEBUG
