@@ -5,8 +5,8 @@ import com.ullink.slack.simpleslackapi.SlackUser;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
 import io.kindler.slack.service.github.GithubIssueService;
-import io.kindler.slack.service.jira.JiraInformationService;
-import io.kindler.slack.service.plantuml.PlantUmlService;
+import io.kindler.slack.service.jira.JiraIssueService;
+import io.kindler.slack.service.plantuml.PlantumlService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SlackMessagePostedListenerImpl implements SlackMessagePostedListener {
     @Autowired
-    PlantUmlService plantUmlService;
+    PlantumlService plantumlService;
 
     @Autowired
-    JiraInformationService jiraInformationService;
+    JiraIssueService jiraIssueService;
 
     @Autowired
     GithubIssueService githubIssueService;
@@ -34,17 +34,17 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
         log.info("[{}] {} says \n{}", event.getTimeStamp(), sender.getId(), content);
 
         // 서비스 발동 조건을 확인하고 서비스를 실행한다
-        if (jiraInformationService.isTrigger(content)) {
+        if (jiraIssueService.isTrigger(content)) {
             log.debug("run jiraInformationService.");
-            jiraInformationService.execute(event, slackSession);
+            jiraIssueService.execute(event, slackSession);
         }
         if (githubIssueService.isTrigger(content)) {
             log.debug("run githubInformationService");
             githubIssueService.execute(event, slackSession);
         }
-        if (plantUmlService.isTrigger(content)) {
+        if (plantumlService.isTrigger(content)) {
             log.debug("run plantUmlService.");
-            plantUmlService.execute(event, slackSession);
+            plantumlService.execute(event, slackSession);
         }
     }
 }
