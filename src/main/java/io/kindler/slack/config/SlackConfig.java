@@ -48,18 +48,5 @@ public class SlackConfig {
         return new SlackConnectedListenerImpl();
     }
 
-    @Bean(name = "plantUmlBot")
-    SlackChatConfiguration plantUmlBot() {
-        return SlackChatConfiguration.getConfiguration()
-                .withName("슾비서 : plantUml")
-                .withIcon("http://plantuml.com/logo3.png");
-    }
-
-    @Bean(name = "jiraConnectBot")
-    SlackChatConfiguration jiraConnectBot() {
-        return SlackChatConfiguration.getConfiguration()
-                .withName("슾비서 : GoJIRA")
-                .withIcon("https://lh3.googleusercontent.com/GkgChJMixx9JAmoUi1majtfpjg1Ra86gZR0GCehJfVcOGQI7Ict_TVafXCtJniVn3R0");
-    }
 
 }
