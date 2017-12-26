@@ -14,4 +14,15 @@ public class JiraProperties {
     private String scheme;
     private String host;
     private String version;
+    private Auth auth;
+
+    @Data
+    public static class Auth {
+        private String username;
+        private String password;
+
+        public String getToken() {
+            return Base64.getEncoder().encodeToString(String.format("%s:%s", username, password).getBytes());
+        }
+    }
 }

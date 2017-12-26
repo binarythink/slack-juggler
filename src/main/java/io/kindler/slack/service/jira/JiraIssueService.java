@@ -26,9 +26,11 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,7 +59,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                 data = new JiraIssue(issueKey);
                 e.printStackTrace();
             }
-            message = makeMessage(data);
+            message = makeMessage(data, issueKey);
             slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
 
         }
@@ -77,6 +79,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                 .buildAndExpand(properties.getVersion(), key);
 
         HttpHeaders headers = new HttpHeaders();
+        headers.put("Authorization", Collections.singletonList("Basic " + properties.getAuth().getToken()));
         RequestEntity<Void> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uriComponents.toUri());
 
         RestTemplate restTemplate = new RestTemplate();
@@ -92,7 +95,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
      * @param data
      * @return
      */
-    private SlackPreparedMessage makeMessage(JiraIssue data) {
+    private SlackPreparedMessage makeMessage(JiraIssue data, String key) {
 
         String titleUrl = properties.getScheme() + "://" + properties.getHost() + "/browser/" + data.getKey();
 
@@ -100,7 +103,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         if (!data.isFetch()) {
             StringBuffer sb = new StringBuffer();
             sb.append(SlackFormatter.link(data.getKey(), titleUrl));
-            sb.append(" 이슈정보를 획득하지 못했습니다. 이슈번호를 클릭하면 해당 이슈로 연결됩니다.");
+            sb.append("이슈정보를 획득하지 못했습니다. 이슈번호를 클릭하면 해당 이슈로 연결됩니다.");
 
             return new SlackPreparedMessage.Builder()
                     .withMessage(sb.toString())
@@ -109,8 +112,9 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
 
         // 데이터를 획득한 경우
         SlackAttachment attachment = new SlackAttachment(
-                data.getKey(),
-                "JIRA Issue", SlackFormatter.codeBock(data.getFields().getSummary())
+                key,
+                "JIRA Issue " + key,
+                SlackFormatter.codeBock(data.getFields().getSummary())
                 , SlackFormatter.italics("이슈번호를 클릭하면 해당 이슈로 연결됩니다.")
         );
         attachment.setTitleLink(titleUrl);
@@ -124,12 +128,12 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
 
         //필드 추가
         attachment.addField("status", SlackFormatter.code(data.getFields().getStatus().getName()), true);
-        attachment.addField("assignee", data.getFields().getAssignee() != null ? StringUtils.defaultIfEmpty(data.getFields().getAssignee().getDisplayName(), "-") : "-", true);
-        attachment.addField("labels", data.getFields().getLabels() != null ? StringUtils.defaultIfEmpty(String.join(", ", data.getFields().getLabels()), "-") : "-", false);
-        attachment.addField("creator", data.getFields().getCreator() != null ? StringUtils.defaultIfEmpty(data.getFields().getCreator().getDisplayName(), "-") : "-", true);
+        attachment.addField("assignee", data.getFields().getAssignee() != null ? SlackFormatter.emptyTo(data.getFields().getAssignee().getDisplayName(), "-") : "–", true);
+        attachment.addField("labels", data.getFields().getLabels() != null ? SlackFormatter.emptyTo(SlackFormatter.arrayJoin(Arrays.stream(data.getFields().getLabels()).map(SlackFormatter::code).collect(Collectors.toList())), "-"): "–", false);
+        attachment.addField("creator", data.getFields().getCreator() != null ? SlackFormatter.emptyTo(data.getFields().getCreator().getDisplayName(), "-") : "-", true);
         attachment.addField("created", data.getFields().getCreated().toString(), true);
-        attachment.addField("duedate", data.getFields().getDuedate() != null ? StringUtils.defaultIfEmpty(data.getFields().getDuedate().toString(), "-") : "-", true);
-        attachment.addField("resolution date", data.getFields().getResolutiondate() != null ? StringUtils.defaultIfEmpty(data.getFields().getResolutiondate().toString(), "-") : "-", true);
+        attachment.addField("duedate", data.getFields().getDuedate() != null ? SlackFormatter.emptyTo(data.getFields().getDuedate().toString(), "-") : "-", true);
+        attachment.addField("resolution date", data.getFields().getResolutiondate() != null ? SlackFormatter.emptyTo(data.getFields().getResolutiondate().toString(), "-") : "-", true);
 
         return new SlackPreparedMessage.Builder()
                 .withAttachments(Collections.singletonList(attachment))
