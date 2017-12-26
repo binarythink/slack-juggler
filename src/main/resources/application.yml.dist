@@ -7,6 +7,9 @@ slack:
       scheme: https                 # jira scheme
       host: jira.atlassian.com      # jira host
       version: latest               # jira api version
+      auth:
+          username: jirauser        # jira username
+          password: jirapass        # jira password
 
     github:
       auth:
