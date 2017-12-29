@@ -10,11 +10,8 @@ import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.jira.domain.JiraIssue;
 import io.kindler.slack.util.SlackFormatter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.tyrus.core.uri.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
@@ -25,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -59,7 +56,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                 data = new JiraIssue(issueKey);
                 e.printStackTrace();
             }
-            message = makeMessage(data, issueKey);
+            message = makeMessage(data, issueKey, event.getThreadTimestamp());
             slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
 
         }
@@ -93,9 +90,10 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
      * 슬랙에 보여질 Message Template를 만든다
      *
      * @param data
+     * @param threadTimestamp
      * @return
      */
-    private SlackPreparedMessage makeMessage(JiraIssue data, String key) {
+    private SlackPreparedMessage makeMessage(JiraIssue data, String key, String threadTimestamp) {
 
         String titleUrl = properties.getScheme() + "://" + properties.getHost() + "/browser/" + data.getKey();
 
@@ -111,6 +109,8 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         }
 
         // 데이터를 획득한 경우
+        SlackPreparedMessage.Builder messageBuilder = new SlackPreparedMessage.Builder();
+
         SlackAttachment attachment = new SlackAttachment(
                 key,
                 "JIRA Issue " + key,
@@ -132,12 +132,16 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         attachment.addField("labels", data.getFields().getLabels() != null ? SlackFormatter.emptyTo(SlackFormatter.arrayJoin(Arrays.stream(data.getFields().getLabels()).map(SlackFormatter::code).collect(Collectors.toList())), "-"): "–", false);
         attachment.addField("creator", data.getFields().getCreator() != null ? SlackFormatter.emptyTo(data.getFields().getCreator().getDisplayName(), "-") : "-", true);
         attachment.addField("created", data.getFields().getCreated().toString(), true);
-        attachment.addField("duedate", data.getFields().getDuedate() != null ? SlackFormatter.emptyTo(data.getFields().getDuedate().toString(), "-") : "-", true);
+        attachment.addField("duedate", data.getFields().getDuedate() != null ? SlackFormatter.emptyTo(new SimpleDateFormat("yyyy-MM-dd").format(data.getFields().getDuedate().toString()), "-") : "-", true);
         attachment.addField("resolution date", data.getFields().getResolutiondate() != null ? SlackFormatter.emptyTo(data.getFields().getResolutiondate().toString(), "-") : "-", true);
 
-        return new SlackPreparedMessage.Builder()
-                .withAttachments(Collections.singletonList(attachment))
-                .build();
+        messageBuilder.withAttachments(Collections.singletonList(attachment));
+
+        if (threadTimestamp != null) {
+            messageBuilder.withThreadTimestamp(threadTimestamp);
+        }
+
+        return messageBuilder.build();
     }
 
 }
