@@ -95,7 +95,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
      */
     private SlackPreparedMessage makeMessage(JiraIssue data, String key, String threadTimestamp) {
 
-        String titleUrl = properties.getScheme() + "://" + properties.getHost() + "/browser/" + data.getKey();
+        String titleUrl = properties.getScheme() + "://" + properties.getHost() + "/browse/" + data.getKey();
 
         // 테이터를 획득하지 못한 경우
         if (!data.isFetch()) {
@@ -132,7 +132,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         attachment.addField("labels", data.getFields().getLabels() != null ? SlackFormatter.emptyTo(SlackFormatter.arrayJoin(Arrays.stream(data.getFields().getLabels()).map(SlackFormatter::code).collect(Collectors.toList())), "-"): "–", false);
         attachment.addField("creator", data.getFields().getCreator() != null ? SlackFormatter.emptyTo(data.getFields().getCreator().getDisplayName(), "-") : "-", true);
         attachment.addField("created", data.getFields().getCreated().toString(), true);
-        attachment.addField("duedate", data.getFields().getDuedate() != null ? SlackFormatter.emptyTo(new SimpleDateFormat("yyyy-MM-dd").format(data.getFields().getDuedate().toString()), "-") : "-", true);
+        attachment.addField("duedate", data.getFields().getDuedate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(data.getFields().getDuedate()) : "-", true);
         attachment.addField("resolution date", data.getFields().getResolutiondate() != null ? SlackFormatter.emptyTo(data.getFields().getResolutiondate().toString(), "-") : "-", true);
 
         messageBuilder.withAttachments(Collections.singletonList(attachment));
