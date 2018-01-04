@@ -67,6 +67,13 @@ public class SlackFormatter {
         return String.join(delimiter, arrText);
     }
 
+    public static String escape(String text) {
+        text = text.replaceAll("&", "&amp;");
+        text = text.replaceAll("<", "&gt;");
+        text = text.replaceAll(">", "&lt;");
+        return text;
+    }
+
     private static String arroundConcat(String text, String append) {
         return append + text + append;
     }

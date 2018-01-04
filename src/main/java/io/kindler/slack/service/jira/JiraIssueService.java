@@ -8,6 +8,7 @@ import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
 import io.kindler.slack.properties.JiraProperties;
 import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.jira.domain.JiraIssue;
+import io.kindler.slack.service.jira.domain.JiraUser;
 import io.kindler.slack.util.SlackFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -39,6 +41,8 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
     @Qualifier(value = "jiraBot")
     private SlackChatConfiguration chatConfiguration;
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
     @Override
     public void execute(SlackMessagePosted event, SlackSession slackSession) {
         String content = event.getMessageContent();
@@ -56,7 +60,12 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                 data = new JiraIssue(issueKey);
                 e.printStackTrace();
             }
-            message = makeMessage(data, issueKey, event.getThreadTimestamp());
+
+            if (properties.isForceThread()) {
+                message = makeMessageShort(data, issueKey, event.getThreadTimestamp() != null ? event.getThreadTimestamp() : event.getTimestamp());
+            } else {
+                message = makeMessageShort(data, issueKey, event.getThreadTimestamp());
+            }
             slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
 
         }
@@ -84,6 +93,86 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         JiraIssue body = response.getBody();
         body.setFetch(true);
         return body;
+    }
+
+    private String convertUserJira2Slack(String jiraUsername) {
+        return properties.getMembers().containsKey(jiraUsername) ? properties.getMembers().get(jiraUsername) : jiraUsername;
+    }
+
+    private JiraUser getUserData(String username) {
+        log.debug(username);
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(properties.getScheme())
+                .host(properties.getHost())
+                .path("/rest/api/{version}/user")
+                .queryParam("username", username)
+                .buildAndExpand(properties.getVersion());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.put("Authorization", Collections.singletonList("Basic " + properties.getAuth().getToken()));
+        RequestEntity<Void> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uriComponents.toUri());
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<JiraUser> response = restTemplate.exchange(requestEntity, JiraUser.class);
+        return response.getBody();
+    }
+
+    /**
+     * 슬랙에 보여질 Message Template를 만든다
+     *
+     * @param data
+     * @param threadTimestamp
+     * @return
+     */
+    private SlackPreparedMessage makeMessageShort(JiraIssue data, String key, String threadTimestamp) {
+
+        String titleUrl = properties.getScheme() + "://" + properties.getHost() + "/browse/" + data.getKey();
+
+        // 테이터를 획득하지 못한 경우
+        if (!data.isFetch()) {
+            StringBuffer sb = new StringBuffer();
+            sb.append(SlackFormatter.link(data.getKey(), titleUrl));
+            sb.append(" 이슈정보를 획득하지 못했습니다. 이슈번호를 클릭하면 해당 이슈로 연결됩니다.");
+
+            return new SlackPreparedMessage.Builder()
+                    .withMessage(sb.toString())
+                    .build();
+        }
+
+        // 데이터를 획득한 경우
+        SlackPreparedMessage.Builder messageBuilder = new SlackPreparedMessage.Builder();
+        messageBuilder.withMessage(SlackFormatter.link("[" + key + "]", titleUrl)
+                + properties.getPriority().get(data.getFields().getPriority().getName().toLowerCase())
+                + SlackFormatter.bold(SlackFormatter.link(SlackFormatter.escape(data.getFields().getSummary()) , titleUrl))
+                + " "
+                + SlackFormatter.code(data.getFields().getStatus().getName()));
+        messageBuilder.withUnfurl(false);
+
+        SlackAttachment attachment = new SlackAttachment(
+                null
+                , "JIRA Issue " + key
+                , null
+                , null
+        );
+        attachment.addMarkdownIn("fields");
+
+        //필드 추가
+        String participants = Arrays.stream(data.getFields().getParticipants())
+                .map(x -> x.replaceAll("\\(.+\\)", ""))
+                .map(this::convertUserJira2Slack)
+//                .map(JiraUser::getDisplayName)
+                .collect(Collectors.joining(","));
+
+        attachment.addField("참여자", participants, true);
+        attachment.addField("마감일", data.getFields().getDuedate() != null ? sdf.format(data.getFields().getDuedate()) : "-", true);
+
+        messageBuilder.addAttachment(attachment);
+
+        if (threadTimestamp != null) {
+            messageBuilder.withThreadTimestamp(threadTimestamp);
+        }
+
+        return messageBuilder.build();
     }
 
     /**
