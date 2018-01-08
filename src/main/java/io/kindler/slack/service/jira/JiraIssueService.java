@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -52,21 +51,24 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         Matcher matcher = Pattern.compile(properties.getPattern(), Pattern.CASE_INSENSITIVE).matcher(content);
         SlackPreparedMessage message;
         while (matcher.find()) {
-            issueKey = matcher.group(1).toUpperCase();
-            try {
-                data = getData(issueKey);
-                log.debug("{}", data);
-            } catch (RestClientException e) {
-                data = new JiraIssue(issueKey);
-                e.printStackTrace();
-            }
+            for (int i = 1 ; i <= matcher.groupCount() ; i++) {
+                issueKey = matcher.group(i).toUpperCase();
+                log.debug("{}", issueKey);
+                try {
+                    data = getData(issueKey);
+                    log.debug("{}", data);
+                } catch (RestClientException e) {
+                    data = new JiraIssue(issueKey);
+                    e.printStackTrace();
+                }
 
-            if (properties.isForceThread()) {
-                message = makeMessageShort(data, issueKey, event.getThreadTimestamp() != null ? event.getThreadTimestamp() : event.getTimestamp());
-            } else {
-                message = makeMessageShort(data, issueKey, event.getThreadTimestamp());
+                if (properties.isForceThread()) {
+                    message = makeMessageShort(data, issueKey, event.getThreadTimestamp() != null ? event.getThreadTimestamp() : event.getTimestamp());
+                } else {
+                    message = makeMessageShort(data, issueKey, event.getThreadTimestamp());
+                }
+                slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
             }
-            slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
 
         }
     }
@@ -85,7 +87,9 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                 .buildAndExpand(properties.getVersion(), key);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.put("Authorization", Collections.singletonList("Basic " + properties.getAuth().getToken()));
+        if (properties.getAuth() != null) {
+            headers.put("Authorization", Collections.singletonList("Basic " + properties.getAuth().getToken()));
+        }
         RequestEntity<Void> requestEntity = new RequestEntity<>(headers, HttpMethod.GET, uriComponents.toUri());
 
         RestTemplate restTemplate = new RestTemplate();
@@ -136,6 +140,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
 
             return new SlackPreparedMessage.Builder()
                     .withMessage(sb.toString())
+                    .withThreadTimestamp(threadTimestamp)
                     .build();
         }
 
@@ -156,14 +161,13 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         );
         attachment.addMarkdownIn("fields");
 
-        //필드 추가
-        String participants = Arrays.stream(data.getFields().getParticipants())
-                .map(x -> x.replaceAll("\\(.+\\)", ""))
-                .map(this::convertUserJira2Slack)
-//                .map(JiraUser::getDisplayName)
-                .collect(Collectors.joining(","));
-
-        attachment.addField("참여자", participants, true);
+        if (data.getFields().getParticipants() != null) {
+            String participants = Arrays.stream(data.getFields().getParticipants())
+                    .map(x -> x.replaceAll("\\(.+\\)", ""))
+                    .map(this::convertUserJira2Slack)
+                    .collect(Collectors.joining(","));
+            attachment.addField("참여자", participants, true);
+        }
         attachment.addField("마감일", data.getFields().getDuedate() != null ? sdf.format(data.getFields().getDuedate()) : "-", true);
 
         messageBuilder.addAttachment(attachment);
