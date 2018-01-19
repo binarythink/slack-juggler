@@ -1,23 +1,25 @@
 package io.kindler.slack.service.github;
 
-import io.kindler.slack.Application;
+import io.kindler.slack.config.GithubConfig;
 import io.kindler.slack.properties.GithubProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(
+        classes = {GithubConfig.class, GithubIssueService.class, GithubProperties.class}
+)
+@EnableAutoConfiguration
 public class GithubIssueServiceTest {
     @Autowired
     GithubIssueService service;

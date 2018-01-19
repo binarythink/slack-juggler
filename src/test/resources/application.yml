@@ -1,0 +1,41 @@
+# spring setting
+spring:
+  mvc:
+    static-path-pattern: /resources/**
+slack:
+  config:
+    token: xoxb-290788430146-KsPS6DiCzjnH3y1t8WE92amQ
+    services:
+      - jira
+      - github
+      - plantuml
+  bot:
+    jira:
+      pattern: '((?:JRASERVER)-\d{1,})'
+      scheme: https
+      host: jira.atlassian.com
+      version: latest
+      priority:
+        critical: ":jira_critical:"
+        high: ":jira_high:"
+        highest: ":jira_highest:"
+        lowest: ":jira_lowest:"
+        low: ":jira_low:"
+        major: ":jira_major:"
+        medium: ":jira_medium:"
+        minor: ":jira_minor:"
+        system: ":jira_system:"
+        trivial: ":jira_trivial:"
+    github:
+      useDefaultOwner: true
+      auth:
+        username: binarythink
+        password: dkflfkd@37
+      repo:
+        owner: binarythink
+    plantuml:
+      filepath: /Users/kindler/repository/slack-bot/src/main/resources/static/plantuml/
+      url: http://localhost:8080/plantuml/
+logging:
+  level:
+    io.kindler.slack: DEBUG
