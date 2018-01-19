@@ -31,6 +31,7 @@ public class SlackMessagePostedListenerImpl implements SlackMessagePostedListene
         // 메시지를 보낸 사용자가 봇일 경우 무시한다
         if (sender.isBot()) return;
 
+        log.debug("{}", event);
         log.info("[{}] {} says \n{}", event.getTimeStamp(), sender.getId(), content);
 
         // 서비스 발동 조건을 확인하고 서비스를 실행한다
