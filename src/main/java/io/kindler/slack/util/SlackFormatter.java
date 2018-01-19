@@ -69,8 +69,8 @@ public class SlackFormatter {
 
     public static String escape(String text) {
         text = text.replaceAll("&", "&amp;");
-        text = text.replaceAll("<", "&gt;");
-        text = text.replaceAll(">", "&lt;");
+        text = text.replaceAll("<", "&lt;");
+        text = text.replaceAll(">", "&gt;");
         return text;
     }
 
