@@ -1,6 +1,5 @@
 package io.kindler.slack.config;
 
-import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
 import com.ullink.slack.simpleslackapi.listeners.SlackConnectedListener;
@@ -27,9 +26,6 @@ public class SlackConfig {
         // slack session create
         SlackSession slackSession = SlackSessionFactory.createWebSocketSlackSession(properties.token);
         slackSession.connect();
-
-        // slack session join channel
-        slackSession.joinChannel("general");
 
         // slack session add listener
         slackSession.addMessagePostedListener(eventMessagePosted());
