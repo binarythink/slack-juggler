@@ -3,7 +3,9 @@ package io.kindler.slack.service.plantuml;
 import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.SlackPreparedMessage;
 import com.ullink.slack.simpleslackapi.SlackSession;
+import com.ullink.slack.simpleslackapi.events.SlackEvent;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
+import io.kindler.slack.domain.MessageInfo;
 import io.kindler.slack.properties.PlantumlProperties;
 import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.util.SlackFormatter;
@@ -25,7 +27,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class PlantumlService implements JugglerService<SlackMessagePosted> {
+public class PlantumlService implements JugglerService<SlackEvent> {
 
     @Autowired
     @Qualifier(value = "plantumlBot")
@@ -35,8 +37,8 @@ public class PlantumlService implements JugglerService<SlackMessagePosted> {
     private PlantumlProperties properties;
 
     @Override
-    public void execute(SlackMessagePosted event, SlackSession slackSession) {
-        String content = event.getMessageContent();
+    public void execute(MessageInfo messageInfo, SlackEvent event, SlackSession slackSession) {
+        String content = messageInfo.getContent();
 
         Pattern pattern = Pattern.compile(properties.getPattern());
         Matcher matcher = pattern.matcher(content);
@@ -44,7 +46,7 @@ public class PlantumlService implements JugglerService<SlackMessagePosted> {
 
         String key = matcher.group("key");
         try {
-            File file = new File(properties.getFilepath(), event.getTimeStamp().concat(".png"));
+            File file = new File(properties.getFilepath(), messageInfo.getTimestamp().concat(".png"));
             FileOutputStream out = new FileOutputStream(file);
             SourceStringReader reader = new SourceStringReader(HtmlUtils.htmlUnescape(key));
             reader.generateImage(out, new FileFormatOption(FileFormat.PNG, false));
@@ -55,10 +57,10 @@ public class PlantumlService implements JugglerService<SlackMessagePosted> {
                     .withMessage(properties.getUrl() + file.getName())
                     .build();
 
-            slackSession.sendMessage(event.getChannel(), preparedMessage, chatConfiguration);
+            slackSession.sendMessage(messageInfo.getChannel(), preparedMessage, chatConfiguration);
         } catch (IOException e) {
             e.printStackTrace();
-            slackSession.sendMessage(event.getChannel(), "오류");
+            slackSession.sendMessage(messageInfo.getChannel(), "오류");
         }
     }
 

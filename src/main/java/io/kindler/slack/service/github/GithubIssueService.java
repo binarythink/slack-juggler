@@ -4,7 +4,8 @@ import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.SlackPreparedMessage;
 import com.ullink.slack.simpleslackapi.SlackSession;
-import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
+import com.ullink.slack.simpleslackapi.events.SlackEvent;
+import io.kindler.slack.domain.MessageInfo;
 import io.kindler.slack.properties.GithubProperties;
 import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.github.domain.GithubIssue;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
-public class GithubIssueService implements JugglerService<SlackMessagePosted> {
+public class GithubIssueService implements JugglerService<SlackEvent> {
     @Autowired
     GithubProperties properties;
 
@@ -40,8 +41,8 @@ public class GithubIssueService implements JugglerService<SlackMessagePosted> {
     private SlackChatConfiguration chatConfiguration;
 
     @Override
-    public void execute(SlackMessagePosted event, SlackSession slackSession) {
-        String content = event.getMessageContent();
+    public void execute(MessageInfo messageInfo, SlackEvent event, SlackSession slackSession) {
+        String content = messageInfo.getContent();
 
         String issueKey;
         String owner;
@@ -60,12 +61,12 @@ public class GithubIssueService implements JugglerService<SlackMessagePosted> {
                 data = new GithubIssue();
                 e.printStackTrace();
             }
-            message = makeMessage(data, "["+owner + "/" + repo + " " + matcher.group("fmtNum")+"]");
-            slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
+            message = makeMessage(data, "[" + owner + "/" + repo + " " + matcher.group("fmtNum") + "]");
+            slackSession.sendMessage(messageInfo.getChannel(), message, chatConfiguration);
         }
     }
 
-    private SlackPreparedMessage  makeMessage(GithubIssue data, String trigger) {
+    private SlackPreparedMessage makeMessage(GithubIssue data, String trigger) {
         // 데이터를 획득한 경우
         SlackAttachment attachment = new SlackAttachment(
                 trigger + "\n — " + data.getTitle(),
