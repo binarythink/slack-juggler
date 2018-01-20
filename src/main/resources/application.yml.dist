@@ -1,26 +1,44 @@
 slack:
   config:
     token: s3cr3t                   # slackbot token
+  services:
+    - jira
+    - github
+    - plantuml
   bot:
     jira:
       pattern: '.*(JRASERVER-\d{1,}).*' # jiraConnectService trigger regex
-      scheme: https                 # jira scheme
-      host: jira.atlassian.com      # jira host
-      version: latest               # jira api version
+
+      scheme: https                     # jira scheme
+      host: jira.atlassian.com          # jira host
+      version: latest                   # jira api version
+
       auth:
-          username: jirauser        # jira username
-          password: jirapass        # jira password
+        username: jirauser              # jira username
+        password: jirapass              # jira password
+
+      priority:                         # you're project priority
+        critical: ":jira_critical:"
+        high: ":jira_high:"
+        highest: ":jira_highest:"
+        lowest: ":jira_lowest:"
+        low: ":jira_low:"
+        major: ":jira_major:"
+        medium: ":jira_medium:"
+        minor: ":jira_minor:"
+        system: ":jira_system:"
+        trivial: ":jira_trivial:"
 
     github:
+      useDefaultOwner: true
       auth:
         username: my-github-id      # github id
         password: s3cr3t            # github password
       repo:
         owner: my-github-id         # issue scope (user or organizaion)
-
     plantuml:
-      filepath:                     # plantuml save path
-      url:                          # plantuml img url
+      filepath:                                 # plantuml save path
+      url: http://localhost:8080/plantuml       # plantuml img url
 
 spring:
   mvc:
