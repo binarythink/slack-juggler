@@ -2,6 +2,8 @@ package io.kindler.slack.service;
 
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.events.SlackEvent;
+import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
+import io.kindler.slack.domain.MessageInfo;
 
 public interface JugglerService<T extends SlackEvent> {
 
@@ -11,7 +13,7 @@ public interface JugglerService<T extends SlackEvent> {
      * @param event
      * @param slackSession
      */
-    void execute(T event, SlackSession slackSession);
+    void execute(MessageInfo messageInfo, T event, SlackSession slackSession);
 
     /**
      * 발동 조건을 검사한다

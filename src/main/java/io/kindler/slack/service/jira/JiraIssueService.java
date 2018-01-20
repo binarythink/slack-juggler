@@ -4,7 +4,8 @@ import com.ullink.slack.simpleslackapi.SlackAttachment;
 import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.SlackPreparedMessage;
 import com.ullink.slack.simpleslackapi.SlackSession;
-import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
+import com.ullink.slack.simpleslackapi.events.SlackEvent;
+import io.kindler.slack.domain.MessageInfo;
 import io.kindler.slack.properties.JiraProperties;
 import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.jira.domain.JiraIssue;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class JiraIssueService implements JugglerService<SlackMessagePosted> {
+public class JiraIssueService implements JugglerService<SlackEvent> {
     @Autowired
     JiraProperties properties;
 
@@ -43,15 +44,15 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
-    public void execute(SlackMessagePosted event, SlackSession slackSession) {
-        String content = event.getMessageContent();
+    public void execute(MessageInfo messageInfo, SlackEvent event, SlackSession slackSession) {
+        String content = messageInfo.getContent();
 
         String issueKey;
         JiraIssue data = null;
         Matcher matcher = Pattern.compile(properties.getPattern(), Pattern.CASE_INSENSITIVE).matcher(content);
         SlackPreparedMessage message;
         while (matcher.find()) {
-            for (int i = 1 ; i <= matcher.groupCount() ; i++) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
                 issueKey = matcher.group(i).toUpperCase();
                 log.debug("{}", issueKey);
                 try {
@@ -63,11 +64,12 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                 }
 
                 if (properties.isForceThread()) {
-                    message = makeMessageShort(data, issueKey, event.getThreadTimestamp() != null ? event.getThreadTimestamp() : event.getTimestamp());
+                    message = makeMessageShort(data, issueKey, messageInfo.getThreadTimestamp() != null ? messageInfo.getThreadTimestamp() : messageInfo.getTimestamp());
                 } else {
-                    message = makeMessageShort(data, issueKey, event.getThreadTimestamp());
+                    message = makeMessageShort(data, issueKey, messageInfo.getThreadTimestamp());
                 }
-                slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
+                slackSession.sendMessage(messageInfo.getChannel(), message, chatConfiguration);
+
             }
 
         }
@@ -148,7 +150,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         SlackPreparedMessage.Builder messageBuilder = new SlackPreparedMessage.Builder();
         messageBuilder.withMessage(SlackFormatter.link("[" + key + "]", titleUrl)
                 + properties.getPriority().get(data.getFields().getPriority().getName().toLowerCase())
-                + SlackFormatter.bold(SlackFormatter.link(SlackFormatter.escape(data.getFields().getSummary()) , titleUrl))
+                + SlackFormatter.bold(SlackFormatter.link(SlackFormatter.escape(data.getFields().getSummary()), titleUrl))
                 + " "
                 + SlackFormatter.code(data.getFields().getStatus().getName()));
         messageBuilder.withUnfurl(false);
@@ -222,7 +224,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         //필드 추가
         attachment.addField("status", SlackFormatter.code(data.getFields().getStatus().getName()), true);
         attachment.addField("assignee", data.getFields().getAssignee() != null ? SlackFormatter.emptyTo(data.getFields().getAssignee().getDisplayName(), "-") : "–", true);
-        attachment.addField("labels", data.getFields().getLabels() != null ? SlackFormatter.emptyTo(SlackFormatter.arrayJoin(Arrays.stream(data.getFields().getLabels()).map(SlackFormatter::code).collect(Collectors.toList())), "-"): "–", false);
+        attachment.addField("labels", data.getFields().getLabels() != null ? SlackFormatter.emptyTo(SlackFormatter.arrayJoin(Arrays.stream(data.getFields().getLabels()).map(SlackFormatter::code).collect(Collectors.toList())), "-") : "–", false);
         attachment.addField("creator", data.getFields().getCreator() != null ? SlackFormatter.emptyTo(data.getFields().getCreator().getDisplayName(), "-") : "-", true);
         attachment.addField("created", data.getFields().getCreated().toString(), true);
         attachment.addField("duedate", data.getFields().getDuedate() != null ? new SimpleDateFormat("yyyy-MM-dd").format(data.getFields().getDuedate()) : "-", true);
