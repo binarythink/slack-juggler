@@ -21,7 +21,7 @@ public class JiraIssueFields {
     private Date duedate;
     private Date resolutiondate;
     private String[] labels = new String[0];
-    @JsonProperty("customfield_10521")
+    @JsonProperty("customfield_10302")
     private String[] participants;
 
     private JiraUser creator;
