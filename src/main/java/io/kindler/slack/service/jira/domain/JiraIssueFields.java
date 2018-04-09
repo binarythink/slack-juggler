@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,9 +22,11 @@ public class JiraIssueFields {
     private Date duedate;
     private Date resolutiondate;
     private String[] labels = new String[0];
-    @JsonProperty("customfield_10302")
-    private String[] participants;
 
+    @JsonProperty("customfield_10521")
+    private List<JiraUser> participants;
+    @JsonProperty("customfield_10526")
+    private JiraUser po;
     private JiraUser creator;
     private JiraUser assignee;
     private JiraUser reporter;

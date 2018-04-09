@@ -24,8 +24,10 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -161,13 +163,23 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         );
         attachment.addMarkdownIn("fields");
 
-        if (data.getFields().getParticipants() != null) {
-            String participants = Arrays.stream(data.getFields().getParticipants())
-                    .map(x -> x.replaceAll("\\(.+\\)", ""))
-                    .map(this::convertUserJira2Slack)
-                    .collect(Collectors.joining(","));
-            attachment.addField("참여자", participants, true);
+        // 참여자 필드 assignee, reporter, po, participants
+        List<JiraUser> userList = new ArrayList<>();
+        userList.add(data.getFields().getAssignee());
+        userList.add(data.getFields().getReporter());
+        if (data.getFields().getPo() != null) {
+            userList.add(data.getFields().getPo());
         }
+        if (data.getFields().getParticipants() != null) {
+            userList.addAll(data.getFields().getParticipants());
+        }
+        String participants = userList.stream()
+                .map(JiraUser::getName)
+                .map(this::convertUserJira2Slack)
+                .distinct()
+                .collect(Collectors.joining(","));
+
+        attachment.addField("참여자", participants, true);
         attachment.addField("마감일", data.getFields().getDuedate() != null ? sdf.format(data.getFields().getDuedate()) : "-", true);
 
         messageBuilder.addAttachment(attachment);
