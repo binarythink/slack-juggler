@@ -1,6 +1,5 @@
 package io.kindler.slack.config;
 
-import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
 import com.ullink.slack.simpleslackapi.listeners.SlackConnectedListener;
@@ -25,6 +24,7 @@ public class SlackConfig {
     @Bean
     SlackSession slackSession() throws IOException {
         // slack session create
+        log.debug("slack properties : {}", properties);
         SlackSession slackSession = SlackSessionFactory.createWebSocketSlackSession(properties.token);
         slackSession.connect();
 
