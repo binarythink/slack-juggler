@@ -1,14 +1,13 @@
 package io.kindler.slack.service.jira;
 
-import com.ullink.slack.simpleslackapi.SlackAttachment;
-import com.ullink.slack.simpleslackapi.SlackChatConfiguration;
-import com.ullink.slack.simpleslackapi.SlackPreparedMessage;
-import com.ullink.slack.simpleslackapi.SlackSession;
+import com.ullink.slack.simpleslackapi.*;
 import com.ullink.slack.simpleslackapi.events.SlackMessagePosted;
+import com.ullink.slack.simpleslackapi.replies.SlackMessageReply;
 import io.kindler.slack.properties.JiraProperties;
 import io.kindler.slack.service.JugglerService;
 import io.kindler.slack.service.jira.domain.JiraIssue;
 import io.kindler.slack.service.jira.domain.JiraUser;
+import io.kindler.slack.service.redis.RedisService;
 import io.kindler.slack.util.SlackFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +38,9 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
     JiraProperties properties;
 
     @Autowired
+    RedisService redisService;
+
+    @Autowired
     @Qualifier(value = "jiraBot")
     private SlackChatConfiguration chatConfiguration;
 
@@ -49,7 +51,7 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
         String content = event.getMessageContent();
 
         String issueKey;
-        JiraIssue data = null;
+        JiraIssue data;
         Matcher matcher = Pattern.compile(properties.getPattern(), Pattern.CASE_INSENSITIVE).matcher(content);
         SlackPreparedMessage message;
         while (matcher.find()) {
@@ -64,12 +66,16 @@ public class JiraIssueService implements JugglerService<SlackMessagePosted> {
                     e.printStackTrace();
                 }
 
+                String parentTimestamp;
                 if (properties.isForceThread()) {
-                    message = makeMessageShort(data, issueKey, event.getThreadTimestamp() != null ? event.getThreadTimestamp() : event.getTimestamp());
+                    parentTimestamp = event.getThreadTimestamp() != null ? event.getThreadTimestamp() : event.getTimestamp();
                 } else {
-                    message = makeMessageShort(data, issueKey, event.getThreadTimestamp());
+                    parentTimestamp = event.getThreadTimestamp();
                 }
-                slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
+                message = makeMessageShort(data, issueKey, parentTimestamp);
+                SlackMessageHandle<SlackMessageReply> reply = slackSession.sendMessage(event.getChannel(), message, chatConfiguration);
+                String replyTimestamp = reply.getReply().getTimestamp();
+                redisService.setHistory(event.getChannel().getName(), parentTimestamp, replyTimestamp);
             }
 
         }

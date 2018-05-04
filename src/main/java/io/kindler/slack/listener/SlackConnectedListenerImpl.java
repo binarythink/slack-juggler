@@ -13,7 +13,7 @@ public class SlackConnectedListenerImpl implements SlackConnectedListener {
 
     @Override
     public void onEvent(SlackConnected slackConnected, SlackSession slackSession) {
-        SlackChannel generalChannel = slackSession.findChannelByName("general");
+        SlackChannel generalChannel = slackSession.findChannelByName("boot-test");
         slackSession.sendMessage(generalChannel, "봇이 출근 했습니다.");
     }
 }
