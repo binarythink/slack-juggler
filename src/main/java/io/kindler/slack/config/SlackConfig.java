@@ -3,10 +3,13 @@ package io.kindler.slack.config;
 import com.ullink.slack.simpleslackapi.SlackSession;
 import com.ullink.slack.simpleslackapi.impl.SlackSessionFactory;
 import com.ullink.slack.simpleslackapi.listeners.SlackConnectedListener;
+import com.ullink.slack.simpleslackapi.listeners.SlackMessageDeletedListener;
 import com.ullink.slack.simpleslackapi.listeners.SlackMessagePostedListener;
+import com.ullink.slack.simpleslackapi.listeners.SlackMessageUpdatedListener;
 import io.kindler.slack.listener.SlackConnectedListenerImpl;
+import io.kindler.slack.listener.SlackMessageDeletedListenerImpl;
 import io.kindler.slack.listener.SlackMessagePostedListenerImpl;
-import io.kindler.slack.properties.SlackProperties;
+import io.kindler.slack.listener.SlackMessageUpdatedListenerImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +21,12 @@ import java.io.IOException;
 @Configuration
 public class SlackConfig {
 
+    private final SlackProperties properties;
+
     @Autowired
-    SlackProperties properties;
+    public SlackConfig(SlackProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
     SlackSession slackSession() throws IOException {
@@ -28,14 +35,16 @@ public class SlackConfig {
         SlackSession slackSession = SlackSessionFactory.createWebSocketSlackSession(properties.token);
         slackSession.connect();
 
-        // slack session join channel
-        slackSession.joinChannel("general");
-
         // slack session add listener
         slackSession.addMessagePostedListener(eventMessagePosted());
-        slackSession.addSlackConnectedListener(eventConnected());
-
+        slackSession.addMessageUpdatedListener(eventMessageUpdate());
+        slackSession.addMessageDeletedListener(eventMessageDelete());
         return slackSession;
+    }
+
+    @Bean
+    SlackMessageDeletedListener eventMessageDelete() {
+        return new SlackMessageDeletedListenerImpl();
     }
 
     @Bean
@@ -48,5 +57,8 @@ public class SlackConfig {
         return new SlackConnectedListenerImpl();
     }
 
-
+    @Bean
+    SlackMessageUpdatedListener eventMessageUpdate() {
+        return new SlackMessageUpdatedListenerImpl();
+    }
 }

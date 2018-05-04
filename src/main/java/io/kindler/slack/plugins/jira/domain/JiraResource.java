@@ -1,0 +1,16 @@
+package io.kindler.slack.plugins.jira.domain;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@NoArgsConstructor
+@ToString
+public class JiraResource {
+    private String id;
+    private String name;
+    private String description;
+    private String iconUrl;
+    private String self;
+}

@@ -54,12 +54,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.ullink.slack</groupId>
-            <artifactId>simpleslackapi</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.2</version>
@@ -70,7 +64,22 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.7</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.github.Ullink</groupId>
+            <artifactId>simple-slack-api</artifactId>
+            <version>d3fe7de811</version>
+        </dependency>
+
+
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
